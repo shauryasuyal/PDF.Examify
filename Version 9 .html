@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Examify</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        header {
+            background-color: #1a237e;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .test-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #e8eaf6;
+            border-radius: 5px;
+        }
+        .timer {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 5px 15px;
+            border-radius: 5px;
+        }
+        .question-container {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .question-number {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1a237e;
+        }
+        .question-text {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .option {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .option:hover {
+            background-color: #e8eaf6;
+        }
+        .option.selected {
+            background-color: #c5cae9;
+            border-left: 4px solid #1a237e;
+        }
+        .option input[type="radio"] {
+            margin-right: 10px;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #303f9f;
+        }
+        button:disabled {
+            background-color: #9fa8da;
+            cursor: not-allowed;
+        }
+        .submit-btn {
+            background-color: #d32f2f;
+        }
+        .submit-btn:hover {
+            background-color: #b71c1c;
+        }
+        .mark-btn {
+            background-color: #ff9800;
+        }
+        .mark-btn:hover {
+            background-color: #f57c00;
+        }
+        .mark-btn.marked {
+            background-color: #4caf50;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 100%;
+            background-color: #1a237e;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .question-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .question-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e8eaf6;
+            border: 1px solid #c5cae9;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .question-btn.answered {
+            background-color: #c5cae9;
+        }
+        .question-btn.current {
+            background-color: #1a237e;
+            color: white;
+        }
+        .question-btn.marked {
+            background-color: #ff9800;
+            color: white;
+        }
+        .question-btn.unanswered {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+            color: #d32f2f;
+        }
+        .question-btn.answered.marked {
+            background: linear-gradient(135deg, #ff9800 50%, #c5cae9 50%);
+        }
+        .question-btn.unanswered.marked {
+            background: linear-gradient(135deg, #ff9800 50%, #ffebee 50%);
+        }
+        .marked-status {
+            font-size: 14px;
+            color: #4caf50;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        /* Extract Screen Styles */
+        .extract-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .extract-screen h1 {
+            color: #1a237e;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .extract-screen p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid #1a237e;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1a237e;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8eaf6;
+        }
+        .instructions ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            position: relative;
+            padding-left: 15px;
+        }
+        .instructions li:before {
+            content: "•";
+            color: #1a237e;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .continue-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #1a237e;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .continue-btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .continue-btn:after {
+            content: "→";
+            margin-left: 10px;
+            transition: margin 0.2s;
+        }
+        .continue-btn:hover:after {
+            margin-left: 15px;
+        }
+        
+        /* Import Screen Styles */
+        .import-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .import-screen h1 {
+            color: #1a237e;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .import-screen p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .import-box {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid #1a237e;
+        }
+        .import-box h3 {
+            margin-top: 0;
+            color: #1a237e;
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8eaf6;
+        }
+        .import-box textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .import-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #1a237e;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .import-btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .format-example {
+            background-color: #e8eaf6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s;
+        }
+        .copy-btn:hover {
+            background-color: #303f9f;
+        }
+        .copy-btn.copied {
+            background-color: #4caf50;
+        }
+        
+        /* Enhanced Start Screen Styles */
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .start-screen h1 {
+            color: #1a237e;
+            font-size: 28px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .start-screen .test-meta {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .start-screen .test-meta span {
+            display: inline-block;
+            margin: 0 10px;
+        }
+        .test-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .summary-item {
+            background-color: #e8eaf6;
+            padding: 15px 20px;
+            border-radius: 6px;
+            min-width: 150px;
+            margin: 10px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.05);
+        }
+        .summary-item .label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .summary-item .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a237e;
+        }
+        .hidden {
+            display: none;
+        }
+        
+        /* Configuration Screen Styles */
+        .config-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .config-screen h1 {
+            color: #1a237e;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .config-screen p {
+            color: #555;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+        .config-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+            text-align: left;
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a237e;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #1a237e;
+            box-shadow: 0 0 0 2px rgba(26, 35, 126, 0.2);
+            outline: none;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .config-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #1a237e;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .config-btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .form-header {
+            grid-column: span 2;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .form-header h2 {
+            color: #1a237e;
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eaf6;
+        }
+        .required-field::after {
+            content: " *";
+            color: #d32f2f;
+        }
+        
+        /* Status Panel Styles */
+        .status-panel {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .status-value {
+            font-weight: bold;
+            color: #1a237e;
+            min-width: 20px;
+            text-align: center;
+            padding: 3px 8px;
+            background-color: white;
+            border-radius: 3px;
+        }
+        
+        /* Welcome Screen Styles */
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .welcome-screen h1 {
+            color: #1a237e;
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .welcome-screen p {
+            color: #555;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .welcome-screen .hero {
+            background-color: #e8eaf6;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .welcome-screen .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            width: 250px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid #1a237e;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .feature-card h3 {
+            color: #1a237e;
+            margin-top: 0;
+        }
+        .feature-card p {
+            font-size: 16px;
+            margin-bottom: 0;
+        }
+        .feature-icon {
+            font-size: 40px;
+            color: #1a237e;
+            margin-bottom: 15px;
+        }
+        .get-started-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .get-started-btn:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+        }
+        .back-btn:hover {
+            background-color: #b71c1c;
+        }
+        .problem-solution {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+            border-left: 4px solid #1a237e;
+        }
+        .problem-solution h2 {
+            color: #1a237e;
+            margin-top: 0;
+        }
+        .problem-solution h3 {
+            color: #d32f2f;
+            margin-bottom: 10px;
+        }
+        .problem-solution .solution h3 {
+            color: #4caf50;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            .test-info {
+                flex-direction: column;
+            }
+            .timer {
+                margin-top: 10px;
+                text-align: center;
+            }
+            .navigation {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            .navigation button {
+                flex: 1 1 40%;
+            }
+            .config-form {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            .form-header {
+                grid-column: span 1;
+            }
+            .form-group input, .form-group textarea {
+                padding: 10px;
+            }
+            .test-summary {
+                flex-direction: column;
+                align-items: center;
+            }
+            .summary-item {
+                width: 100%;
+                max-width: 250px;
+            }
+            .status-panel {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            .welcome-screen h1 {
+                font-size: 28px;
+            }
+            .welcome-screen p {
+                font-size: 16px;
+            }
+            .feature-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+    <style>
+        #footer-credit {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 16px;
+            background-color: #1a237e;
+            color: white;
+            font-size: 12px;
+            text-align: center;
+            line-height: 16px;
+            font-weight: 600;
+            box-shadow: 0 -1px 3px rgba(26, 35, 126, 0.5);
+            z-index: 1000;
+        }
+    </style>
+    <style>
+        /* Chat iframe styles */
+        #chat-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            display: none;
+            z-index: 10000;
+        }
+        #chat-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 10px;
+        }
+        #chat-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1a237e;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #chat-toggle-btn:hover {
+            background-color: #303f9f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="welcome-screen">
+            <h1>Welcome to Interactive CBT Creator</h1>
+            <p>Transform your PDF MCQs into realistic computer-based tests with instant feedback and performance analysis.</p>
+            
+            <div class="hero">
+                <h2>Create Practice Tests That Feel Like the Real Exam</h2>
+                <p>Our platform helps you prepare effectively by simulating the actual test environment</p>
+            </div>
+            
+            <div class="problem-solution">
+                <h2>The Challenge & Our Solution</h2>
+                
+                <div class="problem">
+                    <h3>The Problem:</h3>
+                    <p>Many students struggle to practice effectively for computer-based tests (CBTs) because reading and solving MCQs directly from PDF files doesn't provide a real CBT experience. This disconnect makes it harder for students to adapt to the actual exam environment.</p>
+                </div>
+                
+                <div class="solution">
+                    <h3>Our Solution:</h3>
+                    <p>Our website bridges this gap by allowing students to upload their PDF files containing MCQs and automatically converts them into an interactive CBT format. The platform simulates a real exam interface and provides a result window at the end, giving students both a realistic test experience and instant feedback on their performance.</p>
+                </div>
+            </div>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h3>PDF Conversion</h3>
+                    <p>Easily convert your PDF question banks into interactive tests with our simple process.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h3>Timed Tests</h3>
+                    <p>Simulate real exam conditions with timed tests and automatic submission.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Instant Results</h3>
+                    <p>Get detailed performance analysis immediately after test completion.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Question Review</h3>
+                    <p>Review all questions with correct answers and explanations after submission.</p>
+                </div>
+            </div>
+            
+            <button id="get-started-btn" class="get-started-btn">Get Started Now</button>
+        </div>
+
+        <!-- Extract Questions Screen -->
+        <div id="extract-screen" class="extract-screen hidden">
+            <h1>Extract Questions Using DeepSeek</h1>
+            <p>Follow these instructions to extract questions from your PDF using DeepSeek AI</p>
+            
+            <div class="instructions">
+                <h3>MUST READ - Instructions for Extracting MCQs Using DeepSeek :</h3>
+                <ul>
+                    <li>Ensure your PDF file containing the MCQs is ready for upload.</li>
+                    <li>Visit <a href="https://chat.deepseek.com" target="_blank">https://chat.deepseek.com</a>.</li>
+                    <li>Log in or sign up for an account.</li>
+                    <li>Copy the prompt provided in the next window.</li>
+                    <li>Paste the prompt into the DeepSeek chat box.</li>
+                    <li>Upload the PDF file containing the questions into the chat.</li>
+                    <li>Submit the prompt and wait for the processing to complete.</li>
+                    <li>Once the output is generated, copy the extracted content from the DeepSeek window.</li>
+                    <li>Paste the extracted questions into our website and click on "Import Questions & Continue" to proceed.</li>
+                    <li>Currently, questions based on diagrams or images cannot be extracted.</li>
+                    <li>Please ensure that the answer key is included in the PDF to facilitate accurate result verification.</li>
+                </ul>
+            </div>
+
+            
+            <button id="continue-btn" class="continue-btn">Continue to Import</button>
+            <button id="back-to-welcome-btn" class="back-btn">Back to Welcome</button>
+         </div>
+
+        <!-- Import Questions Screen -->
+        <div id="import-screen" class="import-screen hidden">
+            <h1>Import Questions</h1>
+            <p>Upload your test questions in the specified format to create a customized assessment</p>
+
+            <button id="chat-toggle-btn" title="Open DeepSeek Chat" style="margin-bottom: 5px;">💬</button>
+            <div style="text-align: center; font-size: 14px; color: #0d1450; margin-bottom: 15px; font-weight: 700; padding-top: 2px;">Powered by AI</div>
+            <div class="import-box">
+                <h3>Prompt</h3>
+                <p>Please copy the prompt below, press on the small chat toggle at the bottom right and paste the prompt into the DeepSeek text box :</p>
+                <div class="format-example">
+                    <button id="copy-btn" class="copy-btn">Copy Prompt</button>
+<b>Task:</b> Convert MCQs from PDF to JSON format for an online test.
+
+<b>Requirements:</b>
+Create an array of question objects with:
+
+1. number (sequential integer)
+2. text (question text, use "br tag" for line breaks between options)
+3. options (array preserving original numbering like "(1)", "(2)")
+4. correctAnswer (0-based index from answer key)
+5. There is no need to repeat the part of the question that is already going to be in the options
+6. Make sure all the questions are written in full , no skipping 
+7. Whenever " Read the given passage " is mentioned, make sure to write the entire passage as well 
+8. If any word is underlined in a question, make sure you underline it in the test too
+
+<b>Handle:</b>
+
+1. All questions from the PDF
+2. Multi-part questions (A), B), etc.) with "br tag" separation
+3. Matching questions (List-I/List-II) as single items
+</div>
+                <textarea id="questions-input" placeholder="Please paste your questions here in the specified format that you copied from DeepSeek ..."></textarea>
+            </div>
+            
+            <button id="import-btn" class="import-btn">Import Questions & Continue</button>
+            <button id="skip-import-btn" class="import-btn" style="background-color: #757575; margin-left: 10px;">Skip & Use Default Questions</button>
+            <button id="back-to-extract-btn" class="back-btn" style="margin-left: 10px;">Back to Extract </button>
+        </div>
+
+        <!-- Configuration Screen -->
+        <div id="config-screen" class="config-screen hidden">
+            <h1>Test Configuration</h1>
+            <p>Set up your test parameters to create a customized assessment</p>
+            
+            <div class="config-form">
+                <div class="form-header">
+                    <h2>Basic Test Information</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-name" class="required-field">Test Name:</label>
+                    <input type="text" id="test-name" placeholder="e.g. Midterm Examination" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject-name" class="required-field">Subject Name:</label>
+                    <input type="text" id="subject-name" placeholder="e.g. History, Mathematics" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="paper-code">Paper Code:</label>
+                    <input type="text" id="paper-code" placeholder="e.g. HIST-101, MATH-202">
+                </div>
+                
+                <div class="form-group">
+                    <label for="test-duration" class="required-field">Duration (minutes):</label>
+                    <input type="number" id="test-duration" placeholder="e.g. 60" min="1" required>
+                </div>
+                
+                <div class="form-header">
+                    <h2>Scoring Parameters</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="total-questions" class="required-field">Total Questions:</label>
+                    <input type="number" id="total-questions" placeholder="e.g. 20" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correct-marks" class="required-field">Marks per Correct Answer:</label>
+                    <input type="number" id="correct-marks" placeholder="e.g. 1" min="0" step="0.5" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="wrong-marks">Negative Marks per Wrong Answer:</label>
+                    <input type="number" id="wrong-marks" placeholder="e.g. 0.25" min="0" step="0.25">
+                </div>
+                
+                <div class="form-group" style="grid-column: span 2;">
+                    <label for="additional-info">Additional Instructions:</label>
+                    <textarea id="additional-info" placeholder="Enter any special instructions for test takers..."></textarea>
+                </div>
+            </div>
+            
+            <button id="config-btn" class="config-btn">
+                <span class="btn-icon">✓</span> Save Configuration & Continue
+            </button>
+        </div>
+
+        <!-- Enhanced Start Screen -->
+        <div id="start-screen" class="start-screen hidden">
+            <h1 id="display-test-name">Ready to Begin Your Test</h1>
+            <div class="test-meta">
+                <span>Subject: <strong id="display-subject-name"></strong></span>
+                <span>Paper Code: <strong id="display-paper-code"></strong></span>
+            </div>
+            
+            <div class="test-summary">
+                <div class="summary-item">
+                    <div class="label">Total Questions</div>
+                    <div class="value" id="display-total-questions">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Duration</div>
+                    <div class="value" id="display-duration">0 min</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Correct Marks</div>
+                    <div class="value" id="display-correct-marks">0</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">Negative Marks</div>
+                    <div class="value" id="display-wrong-marks">0</div>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>Test Instructions</h3>
+                <ul id="instructions-list">
+                    <li>Answer all <span id="display-to-attempt"></span> questions.</li>
+                    <li>Each question carries <span id="display-correct-marks-2"></span> marks.</li>
+                    <li>There is a negative marking of <span id="display-wrong-marks-2"></span> mark for each incorrect answer.</li>
+                    <li>The test will automatically submit after <span id="display-duration-2"></span> minutes.</li>
+                    <li>Do not refresh or close the browser during the test.</li>
+                    <li id="additional-info-display"></li>
+                </ul>
+            </div>
+            
+            <button id="start-btn" class="start-btn">Begin Test Now</button>
+        </div>
+
+        <!-- Test Interface (initially hidden) -->
+        <div id="test-interface" class="hidden">
+            <header>
+                <h1 id="test-title"></h1>
+                <div id="test-subtitle"></div>
+            </header>
+
+            <div class="test-info">
+                <div>
+                    <div><strong>Time Allowed:</strong> <span id="test-duration-display"></span> minutes</div>
+                    <div><strong>Maximum Marks:</strong> <span id="max-marks-display"></span></div>
+                    <div><strong>Total Questions:</strong> <span id="total-questions-display"></span> | <strong>To Attempt:</strong> <span id="to-attempt-display"></span></div>
+                </div>
+                <div class="timer" id="timer"></div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <!-- Status Panel -->
+            <div class="status-panel">
+                <div class="status-item">
+                    <span class="status-label">Total:</span>
+                    <span class="status-value" id="total-count">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Answered:</span>
+                    <span class="status-value" id="answered-count">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Unanswered:</span>
+                    <span class="status-value" id="unanswered-count">0</span>
+                </div>
+            <div class="status-item">
+                <span class="status-label">Marked:</span>
+                <span class="status-value" id="marked-count">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Visited:</span>
+                <span class="status-value" id="visited-count">0</span>
+            </div>
+        </div>
+
+            <div class="question-list" id="question-list">
+                <!-- Question buttons will be added here by JavaScript -->
+            </div>
+
+            <div id="question-display">
+                <!-- Questions will be displayed here -->
+            </div>
+
+            <div class="navigation">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="mark-btn" class="mark-btn">Mark for Review</button>
+                <button id="next-btn">Next</button>
+                <button id="submit-btn" class="submit-btn">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="footer-credit">Made by Shaurya Suyal</footer>
+
+    <script>
+        // Default questions data
+        let questions = [
+            {
+                number: 1,
+                text: "Which Sufi teacher was also known as the 'Gharib Nawaz'?",
+                options: [
+                    "(1) Shaikh Nizamuddin Auliya",
+                    "(2) Khwaja Muimuddin",
+                    "(3) Amir Khusrau",
+                    "(4) Shaikh Qutbuddin Bakhtiyar Kaki"
+                ],
+                correctAnswer: 1  // Answer from key: Book A, Q1 = 2 (index 1)
+            },
+            {
+                number: 2,
+                text: "Lord Jagannatha is a form of which God?",
+                options: [
+                    "(1) Surya",
+                    "(2) Vishnu",
+                    "(3) Shiva",
+                    "(4) Brahma"
+                ],
+                correctAnswer: 1  // Answer from key: Book A, Q2 = 2 (index 1)
+            }
+        ];
+
+        // Test state
+        let currentQuestion = 0;
+        let answers = [];
+        let markedQuestions = [];
+        let visitedQuestions = [];
+        let testStarted = false;
+        let timeLeft = 60 * 60;
+        let timerInterval;
+
+        // Screen elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const extractScreen = document.getElementById('extract-screen');
+        const importScreen = document.getElementById('import-screen');
+        const configScreen = document.getElementById('config-screen');
+        const startScreen = document.getElementById('start-screen');
+        const testInterface = document.getElementById('test-interface');
+        
+        // Welcome screen elements
+        const getStartedBtn = document.getElementById('get-started-btn');
+
+        // Add event listener for Get Started Now button
+        getStartedBtn.addEventListener('click', () => {
+            welcomeScreen.classList.add('hidden');
+            extractScreen.classList.remove('hidden');
+        });
+        
+        // Extract screen elements
+        const continueBtn = document.getElementById('continue-btn');
+        const backToWelcomeBtn = document.getElementById('back-to-welcome-btn');
+        
+        // Import screen elements
+        const questionsInput = document.getElementById('questions-input');
+        const importBtn = document.getElementById('import-btn');
+        const skipImportBtn = document.getElementById('skip-import-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const backToExtractBtn = document.getElementById('back-to-extract-btn');
+
+        // Configuration elements
+        const configBtn = document.getElementById('config-btn');
+        const testNameInput = document.getElementById('test-name');
+        const subjectNameInput = document.getElementById('subject-name');
+        const testDurationInput = document.getElementById('test-duration');
+        const totalQuestionsInput = document.getElementById('total-questions');
+        const correctMarksInput = document.getElementById('correct-marks');
+        const wrongMarksInput = document.getElementById('wrong-marks');
+        const paperCodeInput = document.getElementById('paper-code');
+        const additionalInfoInput = document.getElementById('additional-info');
+
+        // Display elements
+        const displayTestName = document.getElementById('display-test-name');
+        const displaySubjectName = document.getElementById('display-subject-name');
+        const displayPaperCode = document.getElementById('display-paper-code');
+        const displayTotalQuestions = document.getElementById('display-total-questions');
+        const displayToAttempt = document.getElementById('display-to-attempt');
+        const displayCorrectMarks = document.getElementById('display-correct-marks');
+        const displayCorrectMarks2 = document.getElementById('display-correct-marks-2');
+        const displayWrongMarks = document.getElementById('display-wrong-marks');
+        const displayWrongMarks2 = document.getElementById('display-wrong-marks-2');
+        const displayDuration = document.getElementById('display-duration');
+        const displayDuration2 = document.getElementById('display-duration-2');
+        const additionalInfoDisplay = document.getElementById('additional-info-display');
+        const testTitle = document.getElementById('test-title');
+        const testSubtitle = document.getElementById('test-subtitle');
+        const testDurationDisplay = document.getElementById('test-duration-display');
+        const maxMarksDisplay = document.getElementById('max-marks-display');
+        const totalQuestionsDisplay = document.getElementById('total-questions-display');
+        const toAttemptDisplay = document.getElementById('to-attempt-display');
+
+        // Status panel elements
+        const totalCount = document.getElementById('total-count');
+        const answeredCount = document.getElementById('answered-count');
+        const unansweredCount = document.getElementById('unanswered-count');
+        const markedCount = document.getElementById('marked-count');
+
+        // Other DOM elements
+        const startBtn = document.getElementById('start-btn');
+        const questionList = document.getElementById('question-list');
+        const questionDisplay = document.getElementById('question-display');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const markBtn = document.getElementById('mark-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const timer = document.getElementById('timer');
+        const progress = document.getElementById('progress');
+
+        // Copy prompt to clipboard
+        copyBtn.addEventListener('click', () => {
+            const promptText = document.querySelector('.format-example').textContent.replace('Copy Prompt', '').trim();
+            navigator.clipboard.writeText(promptText).then(() => {
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('copied');
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Prompt';
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // Continue from extract screen to import screen
+        continueBtn.addEventListener('click', () => {
+            extractScreen.classList.add('hidden');
+            importScreen.classList.remove('hidden');
+        });
+
+        // Toggle chat window visibility
+        const chatToggleBtn = document.getElementById('chat-toggle-btn');
+        // const chatContainer = document.getElementById('chat-container');
+        chatToggleBtn.addEventListener('click', () => {
+            // Copy prompt text to clipboard
+            const promptText = document.querySelector('.format-example').textContent.replace('Copy Prompt', '').trim();
+            navigator.clipboard.writeText(promptText).then(() => {
+                alert('Prompt copied to clipboard. Please paste it into the DeepSeek chat box.');
+                // Open chat.deepseek.com in a new window/tab
+                window.open('https://chat.deepseek.com', '_blank', 'width=400,height=600,resizable=yes,scrollbars=yes');
+            }).catch(() => {
+                alert('Failed to copy prompt to clipboard. Please copy it manually.');
+                window.open('https://chat.deepseek.com', '_blank', 'width=400,height=600,resizable=yes,scrollbars=yes');
+            });
+        });
+
+        // Back to Welcome from Extract screen
+        backToWelcomeBtn.addEventListener('click', () => {
+            extractScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        });
+
+        // Add chat toggle button to import screen
+        // Removed dynamic insertion of chat toggle button to fix visibility and event issues
+
+        // Back to Extract from Import screen
+        backToExtractBtn.addEventListener('click', () => {
+            importScreen.classList.add('hidden');
+            extractScreen.classList.remove('hidden');
+        });
+
+        // Import questions
+        importBtn.addEventListener('click', () => {
+            try {
+                const inputText = questionsInput.value.trim();
+                if (inputText) {
+                    // Parse the input as JSON array (adding brackets if needed)
+                    let parsedQuestions;
+                    if (inputText.startsWith('[') && inputText.endsWith(']')) {
+                        parsedQuestions = JSON.parse(inputText);
+                    } else {
+                        parsedQuestions = JSON.parse(`[${inputText}]`);
+                    }
+                    
+                    // Validate the questions
+                    if (!Array.isArray(parsedQuestions)) {
+                        throw new Error("Questions must be in an array format");
+                    }
+                    
+                    parsedQuestions.forEach((q, i) => {
+                        if (!q.number || !q.text || !q.options || q.correctAnswer === undefined) {
+                            throw new Error(`Question ${i+1} is missing required fields`);
+                        }
+                        if (!Array.isArray(q.options) || q.options.length < 2) {
+                            throw new Error(`Question ${i+1} must have at least 2 options`);
+                        }
+                        if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
+                            throw new Error(`Question ${i+1} has invalid correctAnswer`);
+                        }
+                    });
+                    
+                    // Replace the default questions with imported ones
+                    questions = parsedQuestions;
+                    
+                    // Initialize arrays based on new questions
+                    answers = new Array(questions.length).fill(null);
+                    markedQuestions = new Array(questions.length).fill(false);
+                    visitedQuestions = new Array(questions.length).fill(false);
+                    
+                    // Proceed to configuration
+                    importScreen.classList.add('hidden');
+                    configScreen.classList.remove('hidden');
+                } else {
+                    alert('Please enter questions in the specified format or click "Skip & Use Default Questions"');
+                }
+            } catch (error) {
+                alert(`Error parsing questions: ${error.message}\n\nPlease check the format and try again.`);
+                console.error(error);
+            }
+        });
+
+        // Skip import and use default questions
+        skipImportBtn.addEventListener('click', () => {
+            // Initialize arrays based on default questions
+            answers = new Array(questions.length).fill(null);
+            markedQuestions = new Array(questions.length).fill(false);
+            visitedQuestions = new Array(questions.length).fill(false);
+            
+            importScreen.classList.add('hidden');
+            configScreen.classList.remove('hidden');
+        });
+
+        // Save configuration and proceed to start screen
+        configBtn.addEventListener('click', () => {
+            // Validate required fields
+            if (!testNameInput.value || !subjectNameInput.value || !testDurationInput.value || 
+                !totalQuestionsInput.value || !correctMarksInput.value) {
+                alert('Please fill in all required fields (marked with *)');
+                return;
+            }
+
+            // Update start screen with configuration
+            displayTestName.textContent = testNameInput.value || "Untitled Test";
+            displaySubjectName.textContent = subjectNameInput.value || "General";
+            displayPaperCode.textContent = paperCodeInput.value || "N/A";
+            displayTotalQuestions.textContent = questions.length;
+            displayToAttempt.textContent = questions.length;
+            displayCorrectMarks.textContent = correctMarksInput.value || "0";
+            displayCorrectMarks2.textContent = correctMarksInput.value || "0";
+            displayWrongMarks.textContent = wrongMarksInput.value || "0";
+            displayWrongMarks2.textContent = wrongMarksInput.value || "0";
+            displayDuration.textContent = testDurationInput.value || "0";
+            displayDuration2.textContent = testDurationInput.value || "0";
+            
+            // Process additional info (replace \n with <br> and split into list items)
+            const additionalInfoLines = additionalInfoInput.value.split('\n');
+            additionalInfoDisplay.innerHTML = '';
+            additionalInfoLines.forEach(line => {
+                if (line.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = line;
+                    additionalInfoDisplay.appendChild(li);
+                }
+            });
+            
+            // Hide config screen and show start screen
+            configScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+
+            // Start the test
+        startBtn.addEventListener('click', () => {
+            // Update test interface with configuration
+            testTitle.textContent = testNameInput.value || "Untitled Test";
+            testSubtitle.textContent = `Subject: ${subjectNameInput.value || "General"} | Code: ${paperCodeInput.value || "N/A"} | Medium: English`;
+            testDurationDisplay.textContent = testDurationInput.value || "0";
+            totalQuestionsDisplay.textContent = questions.length;
+            toAttemptDisplay.textContent = questions.length;
+            
+            // Calculate max marks
+            const maxMarks = questions.length * parseFloat(correctMarksInput.value || 0);
+            maxMarksDisplay.textContent = maxMarks;
+            
+            // Set timer
+            timeLeft = parseInt(testDurationInput.value || 0) * 60;
+            updateTimerDisplay();
+            
+            // Hide start screen and show test interface
+            startScreen.classList.add('hidden');
+            testInterface.classList.remove('hidden');
+            testStarted = true;
+            startTimer();
+            initializeQuestionButtons();
+            displayQuestion(currentQuestion);
+            updateStatusCounts();
+        });
+
+        // Initialize question navigation buttons
+        function initializeQuestionButtons() {
+            questionList.innerHTML = '';
+            questions.forEach((question, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'question-btn';
+                btn.textContent = index + 1;
+                btn.addEventListener('click', () => {
+                    currentQuestion = index;
+                    displayQuestion(currentQuestion);
+                });
+                questionList.appendChild(btn);
+            });
+        }
+
+        // Display a question
+        function displayQuestion(index) {
+            // Track visited questions
+            visitedQuestions[index] = true;
+            
+            // Update question buttons
+            document.querySelectorAll('.question-btn').forEach((btn, i) => {
+                btn.classList.remove('current', 'answered', 'marked', 'unanswered');
+                if (i === index) btn.classList.add('current');
+                if (answers[i] !== null) btn.classList.add('answered');
+                if (markedQuestions[i]) btn.classList.add('marked');
+                if (visitedQuestions[i] && answers[i] === null) btn.classList.add('unanswered');
+            });
+
+            // Update navigation buttons
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === questions.length - 1;
+            
+            // Update mark button
+            markBtn.classList.toggle('marked', markedQuestions[index]);
+            markBtn.textContent = markedQuestions[index] ? "Unmark Review" : "Mark for Review";
+
+            // Display the question
+            const question = questions[index];
+            questionDisplay.innerHTML = `
+                <div class="question-container">
+                    <div class="question-number">Question ${question.number}</div>
+                    <div class="question-text">${question.text}</div>
+                    <div class="options" id="options-container">
+                        ${question.options.map((option, i) => `
+                            <label class="option ${answers[index] === i ? 'selected' : ''}">
+                                <input type="radio" name="answer" value="${i}" 
+                                    ${answers[index] === i ? 'checked' : ''}>
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                    ${markedQuestions[index] ? '<div class="marked-status">✓ Marked for review</div>' : ''}
+                </div>
+            `;
+
+            // Add event listeners to options
+            const options = document.querySelectorAll('.option');
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    options.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                             const selectedOption = option.querySelector('input');
+                    if (selectedOption) {
+                        answers[index] = parseInt(selectedOption.value);
+                        updateQuestionButton(index);
+                        updateStatusCounts();
+                    }
+                });
+            });
+
+            // Update progress bar
+            const answeredCount = answers.filter(a => a !== null).length;
+            progress.style.width = `${(answeredCount / questions.length) * 100}%`;
+            
+            // Update status counts
+            updateStatusCounts();
+        }
+
+        // Update question button style when answered
+        function updateQuestionButton(index) {
+            const btn = document.querySelectorAll('.question-btn')[index];
+            btn.classList.remove('answered', 'unanswered');
+            if (answers[index] !== null) {
+                btn.classList.add('answered');
+            } else if (visitedQuestions[index]) {
+                btn.classList.add('unanswered');
+            }
+            
+            // Update progress bar
+            const answeredCount = answers.filter(a => a !== null).length;
+            progress.style.width = `${(answeredCount / questions.length) * 100}%`;
+        }
+
+        // Update status counts
+        function updateStatusCounts() {
+            const total = questions.length;
+            const answered = answers.filter(a => a !== null).length;
+            const unanswered = total - answered;
+            const marked = markedQuestions.filter(m => m).length;
+            const visited = visitedQuestions.filter(v => v).length;
+            
+            totalCount.textContent = total;
+            answeredCount.textContent = answered;
+            unansweredCount.textContent = unanswered;
+            markedCount.textContent = marked;
+            document.getElementById('visited-count').textContent = visited;
+        }
+
+        // Mark/Unmark question for review
+        markBtn.addEventListener('click', () => {
+            markedQuestions[currentQuestion] = !markedQuestions[currentQuestion];
+            markBtn.classList.toggle('marked', markedQuestions[currentQuestion]);
+            markBtn.textContent = markedQuestions[currentQuestion] ? "Unmark Review" : "Mark for Review";
+            
+            // Update the question button in the grid
+            const btn = document.querySelectorAll('.question-btn')[currentQuestion];
+            btn.classList.toggle('marked', markedQuestions[currentQuestion]);
+            
+            // Update the marked status display
+            const markedStatus = document.querySelector('.marked-status');
+            if (markedQuestions[currentQuestion]) {
+                if (!markedStatus) {
+                    const statusDiv = document.createElement('div');
+                    statusDiv.className = 'marked-status';
+                    statusDiv.textContent = '✓ Marked for review';
+                    document.querySelector('.question-container').appendChild(statusDiv);
+                }
+            } else if (markedStatus) {
+                markedStatus.remove();
+            }
+            
+            // Update status counts
+            updateStatusCounts();
+        });
+
+        // Navigation
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion(currentQuestion);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion(currentQuestion);
+            }
+        });
+
+        // Timer
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Submit test
+        submitBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to submit the test?')) {
+                submitTest();
+            }
+        });
+
+        function submitTest() {
+            clearInterval(timerInterval);
+            
+            // Calculate score using configured values
+            const correctMark = parseInt(correctMarksInput.value) || 0;
+            const wrongMark = parseInt(wrongMarksInput.value) || 0;
+            
+            let score = 0;
+            let answeredCount = 0;
+            
+            answers.forEach((answer, index) => {
+                if (answer !== null) {
+                    answeredCount++;
+                    if (answer === questions[index].correctAnswer) {
+                        score += correctMark;
+                    } else {
+                        score -= wrongMark;
+                    }
+                }
+            });
+            
+            // Ensure score doesn't go negative
+            score = Math.max(0, score);
+            
+            // Calculate max possible score
+            const maxPossibleScore = questions.length * correctMark;
+            
+            // Display results with reattempt and new test buttons
+            questionDisplay.innerHTML = `
+                <div class="question-container">
+                    <h2>Test Submitted!</h2>
+                    <p>You answered ${answeredCount} out of ${questions.length} questions.</p>
+                    <p>Your score: ${score} out of ${maxPossibleScore}</p>
+                    <p>Percentage: ${maxPossibleScore > 0 ? ((score / maxPossibleScore) * 100).toFixed(2) : 0}%</p>
+                    
+                    <h3>Question-wise Review:</h3>
+                    ${questions.map((q, i) => `
+                        <div style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                            <p><strong>Q${q.number}:</strong> ${q.text}</p>
+                            <p>Your answer: ${answers[i] !== null ? q.options[answers[i]] : 'Not answered'}</p>
+                            <p>Correct answer: ${q.options[q.correctAnswer]}</p>
+                            <p style="color: ${answers[i] === q.correctAnswer ? 'green' : 'red'}">
+                                ${answers[i] === q.correctAnswer ? 'Correct' : 'Incorrect'}
+                            </p>
+                            ${markedQuestions[i] ? '<p style="color: #ff9800;">✓ Marked for review</p>' : ''}
+                        </div>
+                    `).join('')}
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button id="reattempt-btn" style="margin-right: 15px; padding: 10px 20px; font-size: 16px; background-color: #1a237e; color: white; border: none; border-radius: 5px; cursor: pointer;">Reattempt Test</button>
+                        <button id="newtest-btn" style="padding: 10px 20px; font-size: 16px; background-color: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer;">Start New Test</button>
+                    </div>
+                </div>
+            `;
+            
+            // Hide navigation
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            markBtn.style.display = 'none';
+            submitBtn.style.display = 'none';
+            questionList.style.display = 'none';
+            document.querySelector('.status-panel').style.display = 'none';
+
+            // Add event listeners for new buttons
+            document.getElementById('reattempt-btn').addEventListener('click', () => {
+                reattemptTest();
+            });
+
+            document.getElementById('newtest-btn').addEventListener('click', () => {
+                startNewTest();
+            });
+        }
+
+        // Helper function to reset and reattempt the same test
+        function reattemptTest() {
+            // Reset test state
+            answers = new Array(questions.length).fill(null);
+            markedQuestions = new Array(questions.length).fill(false);
+            visitedQuestions = new Array(questions.length).fill(false);
+            currentQuestion = 0;
+            testStarted = true;
+            timeLeft = parseInt(testDurationInput.value || 0) * 60;
+
+            // Show test interface and navigation
+            testInterface.classList.remove('hidden');
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            markBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'inline-block';
+            questionList.style.display = 'flex';
+            document.querySelector('.status-panel').style.display = 'flex';
+
+            // Initialize UI
+            initializeQuestionButtons();
+            displayQuestion(currentQuestion);
+            updateStatusCounts();
+            updateTimerDisplay();
+
+            // Start timer
+            startTimer();
+        }
+
+        // Helper function to start a new test (go back to welcome or import screen)
+        function startNewTest() {
+            // Reset all test state
+            answers = [];
+            markedQuestions = [];
+            visitedQuestions = [];
+            questions = [];
+            currentQuestion = 0;
+            testStarted = false;
+            timeLeft = 0;
+            clearInterval(timerInterval);
+
+            // Hide all screens except welcome screen
+            testInterface.classList.add('hidden');
+            extractScreen.classList.add('hidden');
+            importScreen.classList.add('hidden');
+            configScreen.classList.add('hidden');
+            startScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+
+            // Reset form inputs
+            testNameInput.value = '';
+            subjectNameInput.value = '';
+            testDurationInput.value = '';
+            totalQuestionsInput.value = '';
+            correctMarksInput.value = '';
+            wrongMarksInput.value = '';
+            paperCodeInput.value = '';
+            additionalInfoInput.value = '';
+
+            // Reset displays
+            displayTestName.textContent = '';
+            displaySubjectName.textContent = '';
+            displayPaperCode.textContent = '';
+            displayTotalQuestions.textContent = '0';
+            displayToAttempt.textContent = '0';
+            displayCorrectMarks.textContent = '0';
+            displayCorrectMarks2.textContent = '0';
+            displayWrongMarks.textContent = '0';
+            displayWrongMarks2.textContent = '0';
+            displayDuration.textContent = '0';
+            displayDuration2.textContent = '0';
+            additionalInfoDisplay.innerHTML = '';
+
+            // Reset timer display
+            timer.textContent = '';
+            progress.style.width = '0%';
+
+            // Show navigation buttons for next test start
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            markBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'inline-block';
+            questionList.style.display = 'flex';
+            document.querySelector('.status-panel').style.display = 'flex';
+        }
+
+        // Warning counter for beforeunload stored in sessionStorage
+        const LEAVE_WARNING_KEY = 'leaveWarningCount';
+
+        function getLeaveWarningCount() {
+            return parseInt(sessionStorage.getItem(LEAVE_WARNING_KEY)) || 0;
+        }
+
+        function setLeaveWarningCount(count) {
+            sessionStorage.setItem(LEAVE_WARNING_KEY, count);
+        }
+
+        // Visibility change warning counter stored in sessionStorage
+        const VISIBILITY_WARNING_KEY = 'visibilityWarningCount';
+
+        function getVisibilityWarningCount() {
+            return parseInt(sessionStorage.getItem(VISIBILITY_WARNING_KEY)) || 0;
+        }
+
+        function setVisibilityWarningCount(count) {
+            sessionStorage.setItem(VISIBILITY_WARNING_KEY, count);
+        }
+
+        // Handle beforeunload to prevent accidental test closure with up to 3 warnings
+        window.addEventListener('beforeunload', (e) => {
+            if (testStarted && timeLeft > 0) {
+                let leaveWarningCount = getLeaveWarningCount();
+                if (leaveWarningCount < 3) {
+                    leaveWarningCount++;
+                    setLeaveWarningCount(leaveWarningCount);
+                    e.preventDefault();
+                    e.returnValue = `Warning ${leaveWarningCount}/3: Are you sure you want to leave? Your test progress will be lost.`;
+                    return e.returnValue;
+                } else {
+                    // Cancel the test after 3 warnings
+                    resetTestAfterCancel();
+                    // Clear warning count
+                    setLeaveWarningCount(0);
+                    setVisibilityWarningCount(0);
+                    // Allow unload without confirmation
+                    return undefined;
+                }
+            }
+        });
+
+        // Warn user on tab/window visibility change during test
+        document.addEventListener('visibilitychange', () => {
+            if (testStarted && timeLeft > 0) {
+                if (document.hidden) {
+                    let visibilityWarningCount = getVisibilityWarningCount();
+                    if (visibilityWarningCount < 3) {
+                        visibilityWarningCount++;
+                        setVisibilityWarningCount(visibilityWarningCount);
+                        alert(`Warning ${visibilityWarningCount}/3: You are not allowed to switch tabs or minimize the browser during the test.`);
+                    } else {
+                        alert('You have switched tabs or minimized the browser 3 times. The test will be canceled.');
+                        resetTestAfterCancel();
+                        setLeaveWarningCount(0);
+                        setVisibilityWarningCount(0);
+                    }
+                }
+            }
+        });
+
+        // Reset warning count when test starts or restarts
+        function resetLeaveWarningCount() {
+            setLeaveWarningCount(0);
+        }
+
+        // Reset test state after canceling due to leaving
+        function resetTestAfterCancel() {
+            answers = [];
+            markedQuestions = [];
+            visitedQuestions = [];
+            questions = [];
+            currentQuestion = 0;
+            testStarted = false;
+            timeLeft = 0;
+            clearInterval(timerInterval);
+
+            // Hide all screens except welcome screen
+            testInterface.classList.add('hidden');
+            extractScreen.classList.add('hidden');
+            importScreen.classList.add('hidden');
+            configScreen.classList.add('hidden');
+            startScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+
+            // Reset form inputs
+            testNameInput.value = '';
+            subjectNameInput.value = '';
+            testDurationInput.value = '';
+            totalQuestionsInput.value = '';
+            correctMarksInput.value = '';
+            wrongMarksInput.value = '';
+            paperCodeInput.value = '';
+            additionalInfoInput.value = '';
+
+            // Reset displays
+            displayTestName.textContent = '';
+            displaySubjectName.textContent = '';
+            displayPaperCode.textContent = '';
+            displayTotalQuestions.textContent = '0';
+            displayToAttempt.textContent = '0';
+            displayCorrectMarks.textContent = '0';
+            displayCorrectMarks2.textContent = '0';
+            displayWrongMarks.textContent = '0';
+            displayWrongMarks2.textContent = '0';
+            displayDuration.textContent = '0';
+            displayDuration2.textContent = '0';
+            additionalInfoDisplay.innerHTML = '';
+
+            // Reset timer display
+            timer.textContent = '';
+            progress.style.width = '0%';
+
+            // Show navigation buttons for next test start
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            markBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'inline-block';
+            questionList.style.display = 'flex';
+            document.querySelector('.status-panel').style.display = 'flex';
+
+            // Reset leave warning count
+            resetLeaveWarningCount();
+        }
+
+        // Modify startTimer and reattemptTest to reset leave warning count
+        function startTimer() {
+            updateTimerDisplay();
+            resetLeaveWarningCount();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitTest();
+                }
+            }, 1000);
+        }
+
+        function reattemptTest() {
+            // Reset test state
+            answers = new Array(questions.length).fill(null);
+            markedQuestions = new Array(questions.length).fill(false);
+            visitedQuestions = new Array(questions.length).fill(false);
+            currentQuestion = 0;
+            testStarted = true;
+            timeLeft = parseInt(testDurationInput.value || 0) * 60;
+
+            // Show test interface and navigation
+            testInterface.classList.remove('hidden');
+            prevBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-block';
+            markBtn.style.display = 'inline-block';
+            submitBtn.style.display = 'inline-block';
+            questionList.style.display = 'flex';
+            document.querySelector('.status-panel').style.display = 'flex';
+
+            // Initialize UI
+            initializeQuestionButtons();
+            displayQuestion(currentQuestion);
+            updateStatusCounts();
+            updateTimerDisplay();
+
+            // Reset leave warning count
+            resetLeaveWarningCount();
+
+            // Start timer
+            startTimer();
+        }
+    </script>
+</body>
+</html>
