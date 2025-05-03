@@ -783,6 +783,8 @@
                 </div>
             </div>
             
+             
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/D_GvCYSi3po" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="display: block; margin: 20px auto 0 auto; border-radius: 8px;"></iframe>
             <button id="get-started-btn" class="get-started-btn">Get Started Now</button>
         </div>
 
@@ -838,7 +840,6 @@ Create an array of question objects with:
 6. Make sure all the questions are written in full , no skipping 
 7. Whenever " Read the given passage " is mentioned, make sure to write the entire passage as well 
 8. If any word is underlined in a question, make sure you underline it in the test too
-9. Questions must be in an array format 
 
 <b>Handle:</b>
 
@@ -1182,54 +1183,80 @@ Create an array of question objects with:
         });
 
         // Import questions
-        importBtn.addEventListener('click', () => {
-            try {
-                const inputText = questionsInput.value.trim();
-                if (inputText) {
-                    // Parse the input as JSON array (adding brackets if needed)
-                    let parsedQuestions;
-                    if (inputText.startsWith('[') && inputText.endsWith(']')) {
-                        parsedQuestions = JSON.parse(inputText);
-                    } else {
-                        parsedQuestions = JSON.parse(`[${inputText}]`);
-                    }
-                    
-                    // Validate the questions
-                    if (!Array.isArray(parsedQuestions)) {
-                        throw new Error("Questions must be in an array format");
-                    }
-                    
-                    parsedQuestions.forEach((q, i) => {
-                        if (!q.number || !q.text || !q.options || q.correctAnswer === undefined) {
-                            throw new Error(`Question ${i+1} is missing required fields`);
-                        }
-                        if (!Array.isArray(q.options) || q.options.length < 2) {
-                            throw new Error(`Question ${i+1} must have at least 2 options`);
-                        }
-                        if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
-                            throw new Error(`Question ${i+1} has invalid correctAnswer`);
-                        }
-                    });
-                    
-                    // Replace the default questions with imported ones
-                    questions = parsedQuestions;
-                    
-                    // Initialize arrays based on new questions
-                    answers = new Array(questions.length).fill(null);
-                    markedQuestions = new Array(questions.length).fill(false);
-                    visitedQuestions = new Array(questions.length).fill(false);
-                    
-                    // Proceed to configuration
-                    importScreen.classList.add('hidden');
-                    configScreen.classList.remove('hidden');
-                } else {
-                    alert('Please enter questions in the specified format or click "Skip & Use Default Questions"');
+            // Function to attempt to fix common JSON formatting issues
+            function fixJsonFormatting(input) {
+                let fixed = input.trim();
+
+                // Remove trailing commas before closing brackets/braces
+                fixed = fixed.replace(/,\s*([\]}])/g, '$1');
+
+                // Add missing brackets if input looks like array items without brackets
+                if (!fixed.startsWith('[') && !fixed.endsWith(']')) {
+                    fixed = `[${fixed}]`;
                 }
-            } catch (error) {
-                alert(`Error parsing questions: ${error.message}\n\nPlease check the format and try again.`);
-                console.error(error);
+
+                // Replace single quotes with double quotes (naive approach)
+                fixed = fixed.replace(/'/g, '"');
+
+                // Escape unescaped control characters (like newlines) inside strings
+                // This is complex; for now, replace unescaped newlines with \n inside strings
+                // This is a simplistic approach and may not cover all cases
+                fixed = fixed.replace(/\\?\\n/g, '\\n');
+
+                return fixed;
             }
-        });
+
+            importBtn.addEventListener('click', () => {
+                try {
+                    let inputText = questionsInput.value.trim();
+                    if (inputText) {
+                        // Attempt to fix JSON formatting before parsing
+                        const fixedInput = fixJsonFormatting(inputText);
+
+                        let parsedQuestions;
+                        try {
+                            parsedQuestions = JSON.parse(fixedInput);
+                        } catch (e) {
+                            // If still fails, try original input as fallback
+                            parsedQuestions = JSON.parse(inputText);
+                        }
+
+                        // Validate the questions
+                        if (!Array.isArray(parsedQuestions)) {
+                            throw new Error("Questions must be in an array format");
+                        }
+
+                        parsedQuestions.forEach((q, i) => {
+                            if (!q.number || !q.text || !q.options || q.correctAnswer === undefined) {
+                                throw new Error(`Question ${i+1} is missing required fields`);
+                            }
+                            if (!Array.isArray(q.options) || q.options.length < 2) {
+                                throw new Error(`Question ${i+1} must have at least 2 options`);
+                            }
+                            if (typeof q.correctAnswer !== 'number' || q.correctAnswer < 0 || q.correctAnswer >= q.options.length) {
+                                throw new Error(`Question ${i+1} has invalid correctAnswer`);
+                            }
+                        });
+
+                        // Replace the default questions with imported ones
+                        questions = parsedQuestions;
+
+                        // Initialize arrays based on new questions
+                        answers = new Array(questions.length).fill(null);
+                        markedQuestions = new Array(questions.length).fill(false);
+                        visitedQuestions = new Array(questions.length).fill(false);
+
+                        // Proceed to configuration
+                        importScreen.classList.add('hidden');
+                        configScreen.classList.remove('hidden');
+                    } else {
+                        alert('Please enter questions in the specified format or click "Skip & Use Default Questions"');
+                    }
+                } catch (error) {
+                    alert(`Error parsing questions: ${error.message}\n\nPlease check the format and try again.`);
+                    console.error(error);
+                }
+            });
 
         // Skip import and use default questions
         skipImportBtn.addEventListener('click', () => {
